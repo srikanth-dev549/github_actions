@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
-      - uses: 'actions/checkout@v3'
       - id: 'auth'
+        name: Authenticating gcloud
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
@@ -24,7 +24,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
-      - name: Run main.py
+      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
         run: |
           python3 main.py
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -37,7 +37,7 @@ jobs:
         run: terraform init
       - name: Apply Terraform changes
         run: terraform apply -auto-approve
-      - name: Commit stsate fole
+      - name: Committing the state file to local repo | if required change the backend as per ur needs
         run: |
           git add .
           git commit -m "Update state files"
