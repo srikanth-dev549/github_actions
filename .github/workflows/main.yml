@@ -58,6 +58,10 @@ jobs:
           fetch-depth: 0
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
+      - name: Authenticating gcloud
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
       - name: Initialize Terraform
         run: terraform init
       - name: Apply Terraform changes
