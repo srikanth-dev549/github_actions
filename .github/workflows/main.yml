@@ -18,14 +18,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
-      - name: Authenticating gcloud
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
+      
 
   generate-data:
     runs-on: ubuntu-latest
@@ -36,6 +29,14 @@ jobs:
         with:
           persist-credentials: true
           fetch-depth: 0
+      - name: Authenticating gcloud
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
       - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
         run: |
           sudo ls -altr
