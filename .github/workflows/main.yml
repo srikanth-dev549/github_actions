@@ -25,9 +25,6 @@ jobs:
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
       - uses: actions/checkout@v2
-        with:
-         persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
-         fetch-depth: 0
       - name: Run main.py
         run: |
           python3 main.py
