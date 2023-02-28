@@ -18,9 +18,11 @@ jobs:
       - name: Configure GCP credentials
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: new-project1-376506
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
       - name: Run main.py
         run: |
           python3 main.py
