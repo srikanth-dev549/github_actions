@@ -40,7 +40,7 @@ jobs:
       - name: Commit stsate fole
         run: |
           git add .
-          git commit -m "Update state file"
+          git commit -m "Update state files"
           git push origin main
 
 
