@@ -54,6 +54,10 @@ jobs:
         run: terraform apply -auto-approve
       - name: Committing the state file to local repo | if required change the backend as per ur needs
         run: |
-          git add .
-          git commit -m "Update state files"
-          git push origin main
+          if git diff-index --quiet HEAD --; then
+            echo "NO CHANGES TO THE STATE FILE"
+          else
+            git add .
+            git commit -m "Update state files"
+            git push origin main
+          fi
