@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: GCP IAM Roles manual to terraform pipeline
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  install-dependencies:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,6 +15,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
+
+  authenticate:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
       - id: 'auth'
         name: Authenticating gcloud
         uses: 'google-github-actions/auth@v1'
@@ -24,23 +29,37 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
-      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
+
+  update-data:
+    runs-on: ubuntu-latest
+    needs: authenticate
+    steps:
+      - name: Run python file to get all the principles and roles in data.json
+        run: python3 main.py
+      - name: Commit updated data.json
         run: |
-          python3 main.py
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add .
           git commit -m "Update data.json"
+
+  apply-terraform:
+    runs-on: ubuntu-latest
+    needs: update-data
+    steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Initialize Terraform
         run: terraform init
       - name: Apply Terraform changes
         run: terraform apply -auto-approve
-      - name: Committing the state file to local repo | if required change the backend as per ur needs
+
+  commit-state:
+    runs-on: ubuntu-latest
+    needs: apply-terraform
+    steps:
+      - name: Commit state files
         run: |
           git add .
           git commit -m "Update state files"
           git push origin main
-
-
