@@ -1,4 +1,4 @@
-name: GCP IAM Roles manual to terraform pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,20 +6,16 @@ on:
       - main
 
 jobs:
-  install-dependencies:
+  setup:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
-
-  authenticate:
-    runs-on: ubuntu-latest
-    needs: install-dependencies
-    steps:
-      - id: 'auth'
-        name: Authenticating gcloud
+      - name: Authenticating gcloud
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
@@ -28,24 +24,21 @@ jobs:
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
 
-  update-data:
+  generate-data:
     runs-on: ubuntu-latest
-    needs: authenticate
+    needs: setup
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Run python file to get all the principles and roles in data.json
-        run: python3 main.py
-      - name: Commit updated data.json
+      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
         run: |
+          python3 main.py
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add .
           git commit -m "Update data.json"
 
-  apply-terraform:
+  deploy:
     runs-on: ubuntu-latest
-    needs: update-data
+    needs: generate-data
     steps:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
@@ -53,12 +46,7 @@ jobs:
         run: terraform init
       - name: Apply Terraform changes
         run: terraform apply -auto-approve
-
-  commit-state:
-    runs-on: ubuntu-latest
-    needs: apply-terraform
-    steps:
-      - name: Commit state files
+      - name: Committing the state file to local repo | if required change the backend as per ur needs
         run: |
           git add .
           git commit -m "Update state files"
