@@ -41,9 +41,7 @@ jobs:
         run: |
           git add terraform.tfstate
           git commit -m "Update state file"
-    
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          branch: '${{ github.ref }}'
+          git push origin main
+          env:
+            GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
