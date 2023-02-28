@@ -27,9 +27,6 @@ jobs:
       - name: Run main.py
         run: |
           python3 main.py
-          git add data.json
-          git commit -m "Update data.json"
-          git push
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Initialize Terraform
