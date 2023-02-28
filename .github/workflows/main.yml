@@ -42,6 +42,5 @@ jobs:
           git add terraform.tfstate
           git commit -m "Update state file"
           git push origin main
-          env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
 
