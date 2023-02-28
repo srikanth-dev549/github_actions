@@ -34,7 +34,11 @@ jobs:
           git config --global user.name "Srikanth"
           git add data.json
           git commit -m "Update data.json"
-          git push
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          branch: 'main'
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Initialize Terraform
@@ -45,4 +49,8 @@ jobs:
         run: |
           git add terraform.tfstate
           git commit -m "Update state file"
-          git push
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          branch: 'main'
