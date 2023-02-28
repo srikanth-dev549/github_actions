@@ -52,12 +52,14 @@ jobs:
         run: terraform init
       - name: Apply Terraform changes
         run: terraform apply -auto-approve
-      - name: Committing the state file to local repo | if required change the backend as per ur needs
+      - name: Committing the state file to local repo
         run: |
+          git add terraform.tfstate
           if git diff-index --quiet HEAD --; then
-            echo "NO CHANGES TO THE STATE FILE"
+            echo "No changes to commit"
+            exit 0
           else
-            git add .
             git commit -m "Update state files"
             git push origin main
           fi
+
