@@ -38,6 +38,7 @@ jobs:
           fetch-depth: 0
       - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
         run: |
+          sudo ls -altr
           python3 main.py
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
