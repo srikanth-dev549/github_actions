@@ -24,7 +24,7 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Configure GCP credentials
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0.4.3
         with:
           project_id: new-project1-376506
           service_account_key: ${{ secrets.GCP_SA_KEY }}
