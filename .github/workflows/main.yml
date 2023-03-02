@@ -36,14 +36,6 @@ jobs:
       - name: test 2
         run: |
           ls
-          cd public_repo
-          touch a
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add .
-          git commit -m "new"
-          git push origin main
-
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -57,6 +49,8 @@ jobs:
           ls
           cd private_repo
           touch b
+          cp b ../public_repo
+          cd ../public_repo
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add .
