@@ -1,0 +1,20 @@
+{
+ "user_roles": [
+  {
+   "new-project1-376506": {
+    "editor": [
+     "user:nallamala191@gmail.com"
+    ],
+    "owner": [
+     "user:srikanth.dev549@gmail.com"
+    ],
+    "resourcemanager.projectIamAdmin": [
+     "serviceAccount:test-957@new-project1-376506.iam.gserviceaccount.com"
+    ],
+    "viewer": [
+     "user:nallamala009@gmail.com"
+    ]
+   }
+  }
+ ]
+}
