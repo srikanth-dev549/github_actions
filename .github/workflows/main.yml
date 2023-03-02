@@ -23,13 +23,13 @@ jobs:
 
     needs: setup
     steps:
-      - name: Checkout code
+      - name: Checkout code of public repo
         uses: actions/checkout@v2
         with:
           persist-credentials: true
           fetch-depth: 0
           path: public_repo
-      - name: test 2
+      - name: Checking if the project directory is alreay present in the repo if no creates a new dir
         run: |
           cd public_repo
           if [ -d "$PROJECT_ID" ]; then
@@ -38,8 +38,7 @@ jobs:
             mkdir -p "$PROJECT_ID"
             echo "Directory created."
           fi
-
-      - name: Checkout code
+      - name: Checkout code of private repo 
         uses: actions/checkout@v2
         with:
           repository: srikanth-dev549/files
@@ -64,7 +63,7 @@ jobs:
           cd ../public_repo/$PROJECT_ID/
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git add .
+          git add data.json
           if git diff-index --quiet HEAD --; then
             echo "No changes to commit"
           else
@@ -89,8 +88,12 @@ jobs:
           cd private_repo
           cp -rf terraform.tfstate ../public_repo/$PROJECT_ID/
           cd ../public_repo/$PROJECT_ID/
-          git add .
-          git commit -m "Update data.json"
-          git push origin main
+          git add terrafrom.tfstate
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update terraform.tfstate"
+            git push origin main
+          fi
 
 
