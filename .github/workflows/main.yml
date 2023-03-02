@@ -47,19 +47,6 @@ jobs:
           token: ${{ secrets.TOKEN }}
           clean: false
           path: private_repo
- 
-#       - name: test 2
-#         run: |
-#           sudo ls -altr
-#           cd ../
-#           cd github_actions
-#           sudo ls
-#           sudo touch a
-#           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-#           git config --global user.name "github-actions[bot]"
-#           git add .
-#           git commit -m "new"
-#           git push origin main
       - name: Authenticating gcloud
         uses: 'google-github-actions/auth@v1'
         with:
@@ -96,6 +83,7 @@ jobs:
       - name: Apply Terraform changes
         run: |
           cd private_repo
+          export TF_VAR_data_file=$PROJECT_ID-data.json
           terraform apply -auto-approve
       - name: Committing the state file to local repo
         run: |
