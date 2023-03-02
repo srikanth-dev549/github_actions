@@ -30,11 +30,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: test 2
+        run: |
+          sudo cd ../
+          sudo ls -altr
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
           repository: srikanth-dev549/files
           ref: main # or any branch, commit, or tag
           token: ${{ secrets.TOKEN }}
       - name: test 2
         run: |
+          cd ../
           sudo ls -altr
       # - name: Authenticating gcloud
       #   uses: 'google-github-actions/auth@v1'
