@@ -44,7 +44,6 @@ jobs:
           token: ${{ secrets.TOKEN }}
       - name: test 2
         run: |
-          cd ../
           sudo ls -altr
           sudo touch a
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
