@@ -83,17 +83,17 @@ jobs:
         run: |
           cd private_repo
           terraform apply -var="data_file=$PROJECT_ID-data.json" -auto-approve
-      - name: Committing the state file to local repo
-        run: |
-          cd private_repo
-          cp -rf terraform.tfstate ../public_repo/$PROJECT_ID/
-          cd ../public_repo/$PROJECT_ID/
-          git add terrafrom.tfstate
-          if git diff-index --quiet HEAD --; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update terraform.tfstate"
-            git push origin main
-          fi
+#       - name: Committing the state file to local repo
+#         run: |
+#           cd private_repo
+#           cp -rf terraform.tfstate ../public_repo/$PROJECT_ID/
+#           cd ../public_repo/$PROJECT_ID/
+#           git add terrafrom.tfstate
+#           if git diff-index --quiet HEAD --; then
+#             echo "No changes to commit"
+#           else
+#             git commit -m "Update terraform.tfstate"
+#             git push origin main
+#           fi
 
 
