@@ -35,7 +35,9 @@ jobs:
       - name: test 2
         run: |
           sudo ls
+          echo "hi"
           cd ../
+          echo "hi"
           sudo ls
       - name: Checkout code
         uses: actions/checkout@v2
@@ -43,10 +45,13 @@ jobs:
           repository: srikanth-dev549/files
           ref: main 
           token: ${{ secrets.TOKEN }}
+          clean: false
       - name: test 2
         run: |
           sudo ls
+          echo "hi"
           cd ../
+          echo "hi"
           sudo ls
 #       - name: test 2
 #         run: |
