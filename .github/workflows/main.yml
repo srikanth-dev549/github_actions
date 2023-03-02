@@ -31,10 +31,11 @@ jobs:
           path: public_repo
       - name: test 2
         run: |
+          cd public_repo
           if [ -d "$PROJECT_ID" ]; then
             echo "Directory already exists, skipping creation."
           else
-            mkdir -p "$dir"
+            mkdir -p "$PROJECT_ID"
             echo "Directory created."
           fi
 
