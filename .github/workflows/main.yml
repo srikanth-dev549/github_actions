@@ -75,8 +75,9 @@ jobs:
           git add .
           git commit -m "Update data.json"
           git push origin main
-          cd ~/github_actions/private_repo
+          cd ../../
           ls
+          cd private_repo
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Initialize Terraform
