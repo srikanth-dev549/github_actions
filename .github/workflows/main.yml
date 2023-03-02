@@ -14,6 +14,9 @@ jobs:
         with:
           persist-credentials: true
           fetch-depth: 0
+      - name: Test 1
+        run: |
+          sudo ls -altr
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -27,39 +30,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          persist-credentials: true
-          fetch-depth: 0
-      - name: Authenticating gcloud
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
-      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
+          repository: srikanth-dev549/files
+          ref: main # or any branch, commit, or tag
+          token: ${{ secrets.TOKEN }}
+      - name: test 2
         run: |
           sudo ls -altr
-          python3 main.py
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add .
-          git commit -m "Update data.json"
-          git push origin main
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Initialize Terraform
-        run: terraform init
-      - name: Apply Terraform changes
-        run: terraform apply -auto-approve
-      - name: Committing the state file to local repo
-        run: |
-          git add terraform.tfstate
-          if git diff-index --quiet HEAD --; then
-            echo "No changes to commit"
-            exit 0
-          else
-            git commit -m "Update state files"
-            git push origin main
-          fi
+      # - name: Authenticating gcloud
+      #   uses: 'google-github-actions/auth@v1'
+      #   with:
+      #     credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v1'
+      # - name: 'Use gcloud CLI'
+      #   run: 'gcloud info'
+      # - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
+      #   run: |
+      #     sudo ls -altr
+      #     python3 main.py
+      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #     git config --global user.name "github-actions[bot]"
+      #     git add .
+      #     git commit -m "Update data.json"
+      #     git push origin main
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v1
+      # - name: Initialize Terraform
+      #   run: terraform init
+      # - name: Apply Terraform changes
+      #   run: terraform apply -auto-approve
+      # - name: Committing the state file to local repo
+      #   run: |
+      #     git add terraform.tfstate
+      #     if git diff-index --quiet HEAD --; then
+      #       echo "No changes to commit"
+      #       exit 0
+      #     else
+      #       git commit -m "Update state files"
+      #       git push origin main
+      #     fi
 
