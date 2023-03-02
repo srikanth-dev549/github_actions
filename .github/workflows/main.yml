@@ -32,6 +32,7 @@ jobs:
       - name: test 2
         run: |
           cd public_repo
+          ls
           mkdir $PROJECT_ID
 
       - name: Checkout code
