@@ -78,11 +78,11 @@ jobs:
       - name: Initialize Terraform
         run: |
           cd private_repo
-          terraform init
+          terraform init -backend-config="prefix=$PROJECT_ID-statefile"
       - name: Apply Terraform changes
         run: |
           cd private_repo
-          terraform apply -var="data_file=$PROJECT_ID-data.json" -var="project_id=$PROJECT_ID-statefile" -auto-approve
+          terraform apply -var="data_file=$PROJECT_ID-data.json" -auto-approve
 #       - name: Committing the state file to local repo
 #         run: |
 #           cd private_repo
