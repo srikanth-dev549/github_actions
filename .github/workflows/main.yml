@@ -6,26 +6,25 @@ on:
       - main
 
 jobs:
-#   setup:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-#         with:
-#           persist-credentials: true
-#           fetch-depth: 0
-#       - name: Test 1
-#         run: |
-#           sudo ls -altr
-#       - name: Install dependencies
-#         run: |
-#           sudo apt-get update
-#           sudo apt-get install -y python3-pip
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
       
 
   generate-data:
     runs-on: ubuntu-latest
-#     needs: setup
+    strategy:
+      matrix:
+        PROJECT_ID: ['${{ github.event.repository.owner.login }}', "example"]
+      inputs:
+        PROJECT_ID:
+          description: 'Enter a value for my_variable'
+          required: true
+    needs: setup
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,7 +34,9 @@ jobs:
           path: public_repo
       - name: test 2
         run: |
-          ls
+          cd public_repo
+          mkdir ${{matrix.PROJECT_ID}}
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -44,18 +45,6 @@ jobs:
           token: ${{ secrets.TOKEN }}
           clean: false
           path: private_repo
-      - name: test 2
-        run: |
-          ls
-          cd private_repo
-          touch b
-          cp b ../public_repo
-          cd ../public_repo
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add .
-          git commit -m "new"
-          git push origin main
  
 #       - name: test 2
 #         run: |
@@ -69,37 +58,40 @@ jobs:
 #           git add .
 #           git commit -m "new"
 #           git push origin main
-      # - name: Authenticating gcloud
-      #   uses: 'google-github-actions/auth@v1'
-      #   with:
-      #     credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
-      # - name: 'Set up Cloud SDK'
-      #   uses: 'google-github-actions/setup-gcloud@v1'
-      # - name: 'Use gcloud CLI'
-      #   run: 'gcloud info'
-      # - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
-      #   run: |
-      #     sudo ls -altr
-      #     python3 main.py
-      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git config --global user.name "github-actions[bot]"
-      #     git add .
-      #     git commit -m "Update data.json"
-      #     git push origin main
-      # - name: Set up Terraform
-      #   uses: hashicorp/setup-terraform@v1
-      # - name: Initialize Terraform
-      #   run: terraform init
-      # - name: Apply Terraform changes
-      #   run: terraform apply -auto-approve
-      # - name: Committing the state file to local repo
-      #   run: |
-      #     git add terraform.tfstate
-      #     if git diff-index --quiet HEAD --; then
-      #       echo "No changes to commit"
-      #       exit 0
-      #     else
-      #       git commit -m "Update state files"
-      #       git push origin main
-      #     fi
+      - name: Authenticating gcloud
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
+      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
+        run: |
+          cd private_repo
+          ls
+          python3 main.py
+          cp ${{matrix.PROJECT_ID}}-data.json ../public_repo/${{matrix.PROJECT_ID}}/
+          cd ../public_repo/${{PROJECT_ID}}/
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add .
+          git commit -m "Update data.json"
+          git push origin main
+          cd ~/github_actions/private_repo
+          ls
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Initialize Terraform
+        run: terraform init
+      - name: Apply Terraform changes
+        run: terraform apply -auto-approve
+      - name: Committing the state file to local repo
+        run: |
+          cp -rf terraform.tfstate ../public_repo/${{matrix.PROJECT_ID}}/
+          cd ../public_repo/${{matrix.PROJECT_ID}}/
+          git add .
+          git commit -m "Update data.json"
+          git push origin main
+
 
