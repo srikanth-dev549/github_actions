@@ -90,7 +90,9 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Initialize Terraform
-        run: terraform init
+        run: |
+          cd private_repo
+          terraform init
       - name: Apply Terraform changes
         run: |
           cd private_repo
