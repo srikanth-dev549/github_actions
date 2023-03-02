@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
       - name: test 2
         run: |
-          sudo cd ../
+          cd ../
           sudo ls -altr
       - name: Checkout code
         uses: actions/checkout@v2
