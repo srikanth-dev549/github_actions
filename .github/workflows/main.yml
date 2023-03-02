@@ -92,8 +92,6 @@ jobs:
 #           if git diff-index --quiet HEAD --; then
 #             echo "No changes to commit"
 #           else
-#             git commit -m "Update terraform.tfstate"
-#             git push origin main
-#           fi
+
 
 
