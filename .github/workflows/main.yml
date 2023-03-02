@@ -34,16 +34,20 @@ jobs:
           fetch-depth: 0
       - name: test 2
         run: |
+          sudo ls
           cd ../
           sudo ls
-          gh repo clone srikanth-dev549/files
-          ls
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-#         with:
-#           repository: srikanth-dev549/files
-#           ref: main # or any branch, commit, or tag
-#           token: ${{ secrets.TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: srikanth-dev549/files
+          ref: main 
+          token: ${{ secrets.TOKEN }}
+      - name: test 2
+        run: |
+          sudo ls
+          cd ../
+          sudo ls
 #       - name: test 2
 #         run: |
 #           sudo ls -altr
