@@ -36,7 +36,7 @@ jobs:
         run: |
           cd ../
           sudo ls
-          git clone git@github.com:srikanth-dev549/files.git
+          gh repo clone srikanth-dev549/files
           ls
 #       - name: Checkout code
 #         uses: actions/checkout@v2
