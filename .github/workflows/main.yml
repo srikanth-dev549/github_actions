@@ -31,9 +31,12 @@ jobs:
           path: public_repo
       - name: test 2
         run: |
-          cd public_repo
-          ls
-          mkdir $PROJECT_ID
+          if [ -d "$PROJECT_ID" ]; then
+            echo "Directory already exists, skipping creation."
+          else
+            mkdir -p "$dir"
+            echo "Directory created."
+          fi
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -84,7 +87,9 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
       - name: Apply Terraform changes
-        run: terraform apply -auto-approve
+        run: |
+          cd private_repo
+          terraform apply -auto-approve
       - name: Committing the state file to local repo
         run: |
           cp -rf terraform.tfstate ../public_repo/$PROJECT_ID/
