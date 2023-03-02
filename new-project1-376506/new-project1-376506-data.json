@@ -11,6 +11,9 @@
     "resourcemanager.projectIamAdmin": [
      "serviceAccount:test-957@new-project1-376506.iam.gserviceaccount.com"
     ],
+    "storage.admin": [
+     "serviceAccount:test-957@new-project1-376506.iam.gserviceaccount.com"
+    ],
     "viewer": [
      "user:nallamala009@gmail.com"
     ]
