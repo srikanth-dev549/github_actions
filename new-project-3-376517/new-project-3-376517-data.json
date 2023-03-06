@@ -1,0 +1,18 @@
+{
+ "user_roles": [
+  {
+   "new-project-3-376517": {
+    "editor": [
+     "user:nallamala009@gmail.com",
+     "user:vamsikrish.thota39@gmail.com"
+    ],
+    "owner": [
+     "user:srikanth.dev549@gmail.com"
+    ],
+    "viewer": [
+     "user:sairam.vallem@gmail.com"
+    ]
+   }
+  }
+ ]
+}
