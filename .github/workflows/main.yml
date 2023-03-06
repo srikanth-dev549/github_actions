@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PROJECT_ID: new-project-3-376517
+  PROJECT_ID: new-project1-376506
     
 jobs:
   setup:
