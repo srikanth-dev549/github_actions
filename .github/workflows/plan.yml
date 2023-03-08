@@ -1,0 +1,114 @@
+name: 'Terraform Plan Sandbox Project'
+
+on:      
+  push:
+    branches:
+      - '**'
+      - '!main'
+    paths-ignore:
+      - README.md
+      - .gitignore
+      - .github/**
+        
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  get-projects:
+    runs-on: arc-runner-set
+    outputs:
+      matrix: ${{steps.list_dirs.outputs.matrix}}
+      
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # OR "2" -> To retrieve the preceding commit.
+
+    - name: debug list directories
+      run: |
+        git diff --name-only  origin/main 
+        git diff --name-only  origin/main | grep -E '.*\.(tf|tfvars)$' | awk -F '/' '{print $1}' | uniq | jq -cnR '[inputs | select(length>0)]'
+        pwd
+        ls
+
+    
+    - id: list_dirs
+      run: |
+        echo "::set-output name=matrix::$(git diff --name-only  origin/main | grep -E '.*\.(tf|tfvars)$' | awk -F '/' '{print $1}' | uniq | jq -cnR '[inputs | select(length>0)]')"
+
+      
+ 
+  gcp_validation_and_plan:
+    runs-on: self-hosted
+    needs: get-projects
+    if: ${{ needs.get-projects.outputs.matrix != '[]' && needs.get-projects.outputs.matrix != '' }}
+    strategy:
+      matrix:
+        subdir: ${{fromJson(needs.get-projects.outputs.matrix)}}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: 'Install required tools'
+      run: |-
+        uname -a
+        curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o envsubst
+        chmod +x envsubst
+        sudo mv envsubst /usr/local/bin
+        sudo apt-get update -y
+        sudo apt-get --yes install openssh-client
+        type ssh-keyscan
+        sudo apt-get install -y nodejs
+
+    - name: 'Setup Terraform'
+      uses: hashicorp/setup-terraform@v1
+
+    - id: 'auth'
+      name: 'configure authentication'
+      uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: '${{secrets.GCP_WIF_POOL}}'
+        service_account: '${{secrets.GCP_SVC_ACCOUNT}}'
+
+    - name: 'Setup Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v1
+
+    - id: 'gcloud'
+      name: 'gcloud'
+      run: |-
+        gcloud info
+        gcloud config set auth/impersonate_service_account ${{secrets.GCP_AUTOMATION_ACCOUNT}}
+        gcloud config set project ent-cloud-eng-development
+        gcloud config list
+        gcloud projects list
+
+   
+    - name: 'Setup SSH config for github ..'
+      run:  echo '${{ secrets.GHA_SECRET }}' > ~/id_rsa
+
+    - name: 'setup ssh 2'
+      run: ssh-keyscan github.aetna.com > ~/known_hosts
+
+    - name: 'setup ssh 3'
+      run: chmod 600 ~/id_rsa ~/known_hosts
+
+    - name: 'List ssh config'
+      run: |-
+        cat ~/id_rsa
+        cat ~/known_hosts
+        ls -l ~/
+
+
+    - id: terraform_init
+      name: 'Initialize Terraform'
+      working-directory: ${{matrix.subdir}}
+      run: terraform init
+      env:
+        GIT_SSH_COMMAND: "ssh -i ~/id_rsa -o UserKnownHostsFile=~/known_hosts"
+        
+    - id: terraform_plan
+      name: 'Plan Terraform'
+      working-directory: ${{matrix.subdir}}
+      run: terraform plan
