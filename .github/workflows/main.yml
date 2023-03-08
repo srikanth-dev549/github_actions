@@ -1,97 +1,110 @@
-name: CI/CD Pipeline
+name: 'Create New GCP Sandbox Project'
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      PROJECT_NAME:
+        required: true
+        type: string
+        description: Project Name
+      AD_GROUP_NAME :
+        required: true
+        type: string
+        description: AD Group to Access Project
+      COSTCENTER:
+        required: true
+        type: string
+        description: Cost Center (all lowercase,dash and underscores; no special characters)
+      OWNER:
+        required: true
+        type: string
+        description: Owner (all lowercase,dash and underscores; no special characters)
+      OWNER_EMAIL:
+        required: true
+        type: string
+        description: Owner Email (all lowercase,dash and underscores; no special characters)
+      ITPR:
+        required: true
+        type: string
+        description: ITPR (all lowercase,dash and underscores; no special characters)
+      CONTACT_EMAIL:
+        required: true
+        type: string
+        description: Contact Email (all lowercase,dash and underscores; no special characters)
+      DATACLASS:
+        required: true
+        type: string
+        description: Dataclassification (all lowercase,dash and underscores; no special characters)
+      APPNAME:
+        required: true
+        type: string
+        description: AppName (all lowercase,dash and underscores; no special characters)
 
-env:
-  PROJECT_ID: new-project1-376506
-    
+     
+        
+
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
-  setup:
-    runs-on: ubuntu-latest
+  setup_new_directory:
+    runs-on: ubuntu-20.04
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-      
+    - uses: actions/checkout@v3
 
-  generate-data:
-    runs-on: ubuntu-latest
-
-    needs: setup
-    steps:
-      - name: Checkout code of public repo
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: true
-          fetch-depth: 0
-          path: public_repo
-      - name: Checking if the project directory is alreay present in the repo if no creates a new dir
-        run: |
-          cd public_repo
-          if [ -d "$PROJECT_ID" ]; then
-            echo "Directory already exists, skipping creation."
-          else
-            mkdir -p "$PROJECT_ID"
-            echo "Directory created."
-          fi
-      - name: Checkout code of private repo 
-        uses: actions/checkout@v2
-        with:
-          repository: srikanth-dev549/files
-          ref: main 
-          token: ${{ secrets.TOKEN }}
-          clean: false
-          path: private_repo
-      - name: Authenticating gcloud
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY_NEW }}'
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-      - name: 'Use gcloud CLI'
-        run: 'gcloud info'
-      - name: Run python file to get all the principles and roles in data.json | if data.json is already present it will be updated with any manual changes made to the GCP IAM roles
-        run: |
-          cd private_repo
-          ls
-          python3 main.py
-          cp $PROJECT_ID-data.json ../public_repo/$PROJECT_ID/
-          cd ../public_repo/$PROJECT_ID/
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add $PROJECT_ID-data.json
-          if git diff-index --quiet HEAD --; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update data.json"
-            git push origin main
-          fi
-          cd ../../
-          ls
-          cd private_repo
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Initialize Terraform
-        run: |
-          cd private_repo
-          terraform init -backend-config="prefix=$PROJECT_ID-statefile"
-      - name: Apply Terraform changes
-        run: |
-          cd private_repo
-          terraform apply -var="data_file=$PROJECT_ID-data.json" -auto-approve
-#       - name: Committing the state file to local repo
-#         run: |
-#           cd private_repo
-#           cp -rf terraform.tfstate ../public_repo/$PROJECT_ID/
-#           cd ../public_repo/$PROJECT_ID/
-#           git add terrafrom.tfstate
-#           if git diff-index --quiet HEAD --; then
-#             echo "No changes to commit"
-#           else
+    - name: 'Install required tools'
+      run: |-
+        uname -a
+        curl -L https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o envsubst
+        chmod +x envsubst
+        sudo mv envsubst /usr/local/bin
+        sudo apt-get update -y
+        sudo apt-get --yes install openssh-client
 
 
+    - name: Create BRANCH_NAME env variable
+      run: echo "BRANCH_NAME=feature/${{github.event.inputs.PROJECT_NAME}}" >> $GITHUB_ENV
+    - name: Read BRANCH_NAME env variable
+      run: echo "${{ env.BRANCH_NAME }}"
+    - name: Checkout new or existing branch
+      run: |
+        if [ $(git branch -a | grep ${{ env.BRANCH_NAME }} | wc -l) == 0 ]; then git branch ${{ env.BRANCH_NAME }}; fi
+        git checkout ${{ env.BRANCH_NAME }}
+        git branch --set-upstream-to=origin/main ${{ env.BRANCH_NAME }}
+        git pull
+      env:
+        GIT_AUTHOR_EMAIL: "git@github.com"
+        GIT_AUTHOR_NAME: "Github Actions"
+        GIT_COMMITTER_NAME: "git@github.com"
+        GIT_COMMITTER_EMAIL: "Github Actions"
+    - name: Add Subscription Project
+      run: |
+        mkdir -p "${{github.event.inputs.PROJECT_NAME}}"
+        mkdir -p "${{github.event.inputs.PROJECT_NAME}}"
+        cp template/* ${{github.event.inputs.PROJECT_NAME}}
+        cd ${{github.event.inputs.PROJECT_NAME}}
+        cat terraform.tfvars.template| envsubst > terraform.auto.tfvars
+        cat backend.tf.tempate | envsubst > backend.tf
+      env:
+        PROJECT_NAME: ${{github.event.inputs.PROJECT_NAME}}
+        AD_GROUP_NAME : ${{github.event.inputs.AD_GROUP_NAME}}
+        COSTCENTER: ${{github.event.inputs.COSTCENTER}}
+        OWNER:  ${{github.event.inputs.OWNER}}
+        OWNER_EMAIL:  ${{github.event.inputs.OWNER_EMAIL}}
+        ITPR: ${{github.event.inputs.ITPR}}
+        CONTACT_EMAIL:  ${{github.event.inputs.CONTACT_EMAIL}}
+        DATACLASS:  ${{github.event.inputs.DATACLASS}}
+        APPNAME:  ${{github.event.inputs.APPNAME}}
 
+
+    - name: Add, Commit, and Push Changes
+      run: |
+        git add -A
+        git commit -m "Added ${{github.event.inputs.PROJECT_NAME}} sandbox project"
+        git push -u origin "${{ env.BRANCH_NAME }}"
+      env:
+        GIT_AUTHOR_EMAIL: "git@github.com"
+        GIT_AUTHOR_NAME: "Github Actions"
+        GIT_COMMITTER_NAME: "git@github.com"
+        GIT_COMMITTER_EMAIL: "Github Actions"
