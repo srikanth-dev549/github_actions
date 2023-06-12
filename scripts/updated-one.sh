@@ -13,6 +13,7 @@ csv_file="projects.csv"
 while IFS=',' read -r project cluster proxy; do
   echo "Processing project: $project"
 
+
   # Setting the http proxy
   export https_proxy=$proxy
 
